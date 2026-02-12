@@ -49,3 +49,34 @@ Added a `validate` function to the `dateOfBirth` field in `app/signup/page.tsx`:
 - Always pair `required` with domain-specific validation rules for sensitive fields (age, dates, financial data).
 - Add server-side validation as a second layer — client-side checks alone can be bypassed.
 - Include edge-case test cases (future dates, boundary ages like exactly 18) in QA checklists.
+
+---
+
+## Ticket SEC-301: SSN Storage
+
+**Reporter:** Security Audit Team  
+**Priority:** Critical
+
+### Bug Summary
+Social Security Numbers were stored as plaintext in the database and returned in full in API responses — a severe privacy and compliance risk.
+
+### Root Cause
+1. The signup mutation spread `...input` directly into the DB insert, storing the raw SSN string.
+2. API responses returned the full user object (minus password) without redacting the SSN field.
+
+### Fix
+Created `utils/encryption.ts` with:
+- **`encryptSSN()`** — encrypts using AES-256-GCM (IV + auth tag + ciphertext stored as a single hex string).
+- **`decryptSSN()`** — decrypts when internal access to the full SSN is needed.
+- **`maskSSN()`** — returns `***-**-XXXX` (only last 4 digits visible) for display/API responses.
+
+Changes in `server/routers/auth.ts`:
+- **Signup**: SSN is encrypted before DB insert.
+- **Signup response**: returns masked SSN via `maskSSN(input.ssn)`.
+- **Login response**: decrypts stored SSN then masks it via `maskSSN(decryptSSN(user.ssn))`.
+
+### Preventive Measures
+- Never store (SSN, government IDs) in plaintext — always encrypt at rest.
+- Never return sensitive fields in API responses — mask or omit them.
+- Store encryption keys in a secure key management service (e.g., AWS KMS), not in code or env files.
+- Add automated security scans to catch plaintext in DB columns.
