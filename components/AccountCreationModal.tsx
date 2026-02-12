@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc/client";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface AccountCreationModalProps {
   onClose: () => void;
@@ -11,6 +12,8 @@ interface AccountCreationModalProps {
 export function AccountCreationModal({ onClose, onSuccess }: AccountCreationModalProps) {
   const [accountType, setAccountType] = useState<"checking" | "savings">("checking");
   const [error, setError] = useState("");
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const createAccountMutation = trpc.account.createAccount.useMutation();
 
@@ -28,14 +31,14 @@ export function AccountCreationModal({ onClose, onSuccess }: AccountCreationModa
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Open New Account</h3>
+      <div className={`rounded-lg max-w-md w-full p-6 ${isDark ? "bg-gray-800" : "bg-white"}`}>
+        <h3 className={`text-lg font-medium mb-4 ${isDark ? "text-gray-100" : "text-gray-900"}`}>Open New Account</h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Account Type</label>
+            <label className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}>Account Type</label>
             <div className="space-y-2">
-              <label className="flex items-center">
+              <label className={`flex items-center ${isDark ? "text-gray-300" : "text-gray-900"}`}>
                 <input
                   type="radio"
                   value="checking"
@@ -45,7 +48,7 @@ export function AccountCreationModal({ onClose, onSuccess }: AccountCreationModa
                 />
                 <span>Checking Account</span>
               </label>
-              <label className="flex items-center">
+              <label className={`flex items-center ${isDark ? "text-gray-300" : "text-gray-900"}`}>
                 <input
                   type="radio"
                   value="savings"
@@ -64,7 +67,7 @@ export function AccountCreationModal({ onClose, onSuccess }: AccountCreationModa
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              className={`px-4 py-2 text-sm font-medium border rounded-md ${isDark ? "text-gray-300 bg-gray-700 border-gray-600 hover:bg-gray-600" : "text-gray-700 bg-white border-gray-300 hover:bg-gray-50"}`}
             >
               Cancel
             </button>

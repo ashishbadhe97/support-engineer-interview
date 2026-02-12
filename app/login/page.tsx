@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { trpc } from "@/lib/trpc/client";
 import Link from "next/link";
+import { useTheme } from "@/components/ThemeProvider";
 
 type LoginFormData = {
   email: string;
@@ -14,6 +15,8 @@ type LoginFormData = {
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const {
     register,
@@ -33,16 +36,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className={`min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
+          <h2 className={`mt-6 text-center text-3xl font-extrabold ${isDark ? "text-gray-100" : "text-gray-900"}`}>Sign in to your account</h2>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>
                 Email
               </label>
               <input
@@ -54,26 +57,26 @@ export default function LoginPage() {
                   },
                 })}
                 type="email"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                className={`mt-1 block w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border ${isDark ? "bg-gray-800 text-gray-100 border-gray-600" : "bg-white text-gray-900 border-gray-300"}`}
               />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>
                 Password
               </label>
               <input
                 {...register("password", { required: "Password is required" })}
                 type="password"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                className={`mt-1 block w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border ${isDark ? "bg-gray-800 text-gray-100 border-gray-600" : "bg-white text-gray-900 border-gray-300"}`}
               />
               {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
             </div>
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 p-4">
+            <div className={`rounded-md p-4 ${isDark ? "bg-red-900/30" : "bg-red-50"}`}>
               <p className="text-sm text-red-800">{error}</p>
             </div>
           )}
@@ -87,7 +90,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600">
+        <p className={`text-center text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>
           Don't have an account?{" "}
           <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
             Create one

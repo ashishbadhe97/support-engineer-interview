@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { trpc } from "@/lib/trpc/client";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface FundingModalProps {
   accountId: number;
@@ -19,6 +20,8 @@ type FundingFormData = {
 
 export function FundingModal({ accountId, onClose, onSuccess }: FundingModalProps) {
   const [error, setError] = useState("");
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const {
     register,
     handleSubmit,
@@ -55,17 +58,20 @@ export function FundingModal({ accountId, onClose, onSuccess }: FundingModalProp
     }
   };
 
+  const inputClass = `mt-1 block w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border ${isDark ? "bg-gray-800 text-gray-100 border-gray-600" : "bg-white text-gray-900 border-gray-300"}`;
+  const labelClass = `block text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`;
+
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Fund Your Account</h3>
+      <div className={`rounded-lg max-w-md w-full p-6 ${isDark ? "bg-gray-800" : "bg-white"}`}>
+        <h3 className={`text-lg font-medium mb-4 ${isDark ? "text-gray-100" : "text-gray-900"}`}>Fund Your Account</h3>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Amount</label>
+            <label className={labelClass}>Amount</label>
             <div className="mt-1 relative rounded-md shadow-sm">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="text-gray-500 sm:text-sm">$</span>
+                <span className={`sm:text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>$</span>
               </div>
               <input
                 {...register("amount", {
@@ -84,7 +90,7 @@ export function FundingModal({ accountId, onClose, onSuccess }: FundingModalProp
                   },
                 })}
                 type="text"
-                className="pl-7 block w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
+                className={`pl-7 block w-full rounded-md focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border ${isDark ? "bg-gray-700 text-gray-100 border-gray-600" : "bg-white text-gray-900 border-gray-300"}`}
                 placeholder="0.00"
               />
             </div>
@@ -92,13 +98,13 @@ export function FundingModal({ accountId, onClose, onSuccess }: FundingModalProp
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Funding Source</label>
+            <label className={`${labelClass} mb-2`}>Funding Source</label>
             <div className="space-y-2">
-              <label className="flex items-center">
+              <label className={`flex items-center ${isDark ? "text-gray-300" : "text-gray-900"}`}>
                 <input {...register("fundingType")} type="radio" value="card" className="mr-2" />
                 <span>Credit/Debit Card</span>
               </label>
-              <label className="flex items-center">
+              <label className={`flex items-center ${isDark ? "text-gray-300" : "text-gray-900"}`}>
                 <input {...register("fundingType")} type="radio" value="bank" className="mr-2" />
                 <span>Bank Account</span>
               </label>
@@ -106,7 +112,7 @@ export function FundingModal({ accountId, onClose, onSuccess }: FundingModalProp
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className={labelClass}>
               {fundingType === "card" ? "Card Number" : "Account Number"}
             </label>
             <input
@@ -124,7 +130,7 @@ export function FundingModal({ accountId, onClose, onSuccess }: FundingModalProp
                 },
               })}
               type="text"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+              className={inputClass}
               placeholder={fundingType === "card" ? "1234567812345678" : "123456789"}
             />
             {errors.accountNumber && <p className="mt-1 text-sm text-red-600">{errors.accountNumber.message}</p>}
@@ -132,7 +138,7 @@ export function FundingModal({ accountId, onClose, onSuccess }: FundingModalProp
 
           {fundingType === "bank" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">Routing Number</label>
+              <label className={labelClass}>Routing Number</label>
               <input
                 {...register("routingNumber", {
                   required: "Routing number is required",
@@ -142,7 +148,7 @@ export function FundingModal({ accountId, onClose, onSuccess }: FundingModalProp
                   },
                 })}
                 type="text"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                className={inputClass}
                 placeholder="123456789"
               />
               {errors.routingNumber && <p className="mt-1 text-sm text-red-600">{errors.routingNumber.message}</p>}
@@ -155,7 +161,7 @@ export function FundingModal({ accountId, onClose, onSuccess }: FundingModalProp
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              className={`px-4 py-2 text-sm font-medium border rounded-md ${isDark ? "text-gray-300 bg-gray-700 border-gray-600 hover:bg-gray-600" : "text-gray-700 bg-white border-gray-300 hover:bg-gray-50"}`}
             >
               Cancel
             </button>
