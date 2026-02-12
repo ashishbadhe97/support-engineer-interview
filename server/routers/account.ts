@@ -82,7 +82,10 @@ export const accountRouter = router({
           type: z.enum(["card", "bank"]),
           accountNumber: z.string(),
           routingNumber: z.string().optional(),
-        }),
+        }).refine(
+          (data) => data.type !== "bank" || (data.routingNumber && /^\d{9}$/.test(data.routingNumber)),
+          { message: "Routing number (9 digits) is required for bank transfers", path: ["routingNumber"] }
+        ),
       })
     )
     .mutation(async ({ input, ctx }) => {

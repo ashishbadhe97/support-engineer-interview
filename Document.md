@@ -199,3 +199,19 @@ In the FundingModal's amount validation, `min: { value: 0.0 }` allowed $0.00 to 
 
 ### Fix
 Changed `min` value from `0.0` to `0.01` in `components/FundingModal.tsx`.
+
+---
+
+## Ticket VAL-207: Routing Number Optional
+
+**Reporter:** Support Team  
+**Priority:** High
+
+### Bug Summary
+Bank transfers were being submitted without routing numbers, causing failed ACH transfers.
+
+### Root Cause
+The server-side Zod schema in `server/routers/account.ts` had `routingNumber: z.string().optional()`, allowing bank transfers to be submitted without a routing number. While the client had a required check, direct API calls could bypass it.
+
+### Fix
+Added a `.refine()` to the server-side `fundingSource` schema that requires a valid 9-digit routing number when `type` is `"bank"`. This enforces the validation server-side regardless of the client.
