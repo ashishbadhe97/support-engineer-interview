@@ -183,3 +183,19 @@ After a successful funding, the `onSuccess` callback in `app/dashboard/page.tsx`
 
 ### Fix
 Added `utils.account.getTransactions.invalidate()` to the funding `onSuccess` callback in `app/dashboard/page.tsx`, using tRPC's `useUtils()`. This forces the transactions query to refetch after every funding event, so the list always shows the latest transactions.
+
+---
+
+## Ticket VAL-205: Zero Amount Funding
+
+**Reporter:** Lisa Johnson  
+**Priority:** High
+
+### Bug Summary
+Users were able to submit a funding request for $0.00, creating unnecessary transaction records.
+
+### Root Cause
+In the FundingModal's amount validation, `min: { value: 0.0 }` allowed $0.00 to pass — the error message said "at least $0.01" but the actual check allowed zero.
+
+### Fix
+Changed `min` value from `0.0` to `0.01` in `components/FundingModal.tsx`.
