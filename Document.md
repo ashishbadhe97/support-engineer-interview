@@ -126,3 +126,28 @@ Password validation only enforced minimum length (8 chars) and at least one numb
 - Always enforce password complexity on both client and server.
 - Keep the common passwords list updated (consider using a larger dataset like the Have I Been Pwned list).
 - Display password requirements clearly to the user before they submit.
+
+---
+
+## Ticket PERF-406: Balance Calculation
+
+**Reporter:** Finance Team  
+**Priority:** Critical
+
+### Bug Summary
+Account balances became incorrect after multiple transactions, causing financial discrepancies.
+
+### Root Cause
+Two bugs in the `fundAccount` mutation (`server/routers/account.ts`):
+1. **Broken return value**: Instead of returning `account.balance + amount`, the code looped 100 times adding `amount / 100` — introducing **floating-point precision errors** with every iteration.
+2. **Mismatch**: The DB was updated with `account.balance + amount` (correct), but the value returned to the client used the faulty loop calculation, so the UI displayed a wrong balance.
+
+### Fix
+- Replaced the loop with simple addition: `account.balance + amount`.
+- Wrapped in `Math.round(... * 100) / 100` to avoid floating-point drift on currency values.
+- The same `newBalance` is now used for both the DB update and the API response — no mismatch.
+
+### Preventive Measures
+- Never use iterative loops for simple arithmetic — they accumulate floating-point errors.
+- Always round currency values to 2 decimal places (`Math.round(x * 100) / 100`).
+- Ensure the value stored in DB and the value returned to the client come from the same source.
