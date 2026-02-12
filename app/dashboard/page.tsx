@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const isDark = theme === "dark";
 
   const { data: accounts, refetch: refetchAccounts } = trpc.account.getAccounts.useQuery();
+  const utils = trpc.useUtils();
   const logoutMutation = trpc.auth.logout.useMutation();
 
   const handleLogout = async () => {
@@ -133,6 +134,7 @@ export default function DashboardPage() {
           onSuccess={() => {
             setFundingAccountId(null);
             refetchAccounts();
+            utils.account.getTransactions.invalidate();
           }}
         />
       )}

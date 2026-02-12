@@ -167,3 +167,19 @@ After inserting a new account (with `balance: 0`), the code fetched it back from
 
 ### Fix
 Changed the fallback object's `balance` from `100` to `0` in `server/routers/account.ts`, so if the DB fetch after insert fails, the returned balance matches the inserted value.
+
+---
+
+## Ticket PERF-405: Missing Transactions
+
+**Reporter:** Multiple Users  
+**Priority:** Critical
+
+### Bug Summary
+Not all transactions appeared in the transaction history after multiple funding events.
+
+### Root Cause
+After a successful funding, the `onSuccess` callback in `app/dashboard/page.tsx` called `refetchAccounts()` to refresh balances, but **never invalidated the `getTransactions` query**. The `TransactionList` component kept showing stale cached data.
+
+### Fix
+Added `utils.account.getTransactions.invalidate()` to the funding `onSuccess` callback in `app/dashboard/page.tsx`, using tRPC's `useUtils()`. This forces the transactions query to refetch after every funding event, so the list always shows the latest transactions.
