@@ -99,3 +99,30 @@ Replaced the prefix check with the **Luhn algorithm** in `FundingModal.tsx`:
 ### Preventive Measures
 - Use industry-standard algorithms (Luhn) for financial input validation.
 - Clear field-level errors when the context of a form field changes (e.g., switching input types).
+
+---
+
+## Ticket VAL-208: Weak Password Requirements
+
+**Reporter:** Security Team  
+**Priority:** Critical
+
+### Bug Summary
+Password validation only enforced minimum length (8 chars) and at least one number. Weak passwords like `abcdefg1` were accepted.
+
+### Root Cause
+- Client-side: `passwordValidation` in `utils/validations.ts` only checked length, common passwords, and one number.
+- Server-side: Zod schema in `auth.ts` only enforced `min(8)` — no complexity rules at all.
+
+### Fix
+**Client-side** (`utils/validations.ts`):
+- Added checks for **uppercase**, **lowercase**, **number**, and **special character**.
+- Expanded the common passwords blocklist.
+
+**Server-side** (`server/routers/auth.ts`):
+- Added matching `.regex()` Zod validators for uppercase, lowercase, number, and special character — ensures rules can't be bypassed.
+
+### Preventive Measures
+- Always enforce password complexity on both client and server.
+- Keep the common passwords list updated (consider using a larger dataset like the Have I Been Pwned list).
+- Display password requirements clearly to the user before they submit.

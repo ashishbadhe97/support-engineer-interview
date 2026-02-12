@@ -8,7 +8,7 @@ export const emailValidation = {
 };
 
 // ── Password ──
-const COMMON_PASSWORDS = ["password", "12345678", "qwerty"];
+const commonPasswords = ["password", "12345678", "qwerty"];
 
 export const passwordValidation = {
   required: "Password is required",
@@ -18,9 +18,15 @@ export const passwordValidation = {
   },
   validate: {
     notCommon: (value: string) =>
-      !COMMON_PASSWORDS.includes(value.toLowerCase()) || "Password is too common",
+      !commonPasswords.includes(value.toLowerCase()) || "Password is too common",
+    hasUppercase: (value: string) =>
+      /[A-Z]/.test(value) || "Password must contain an uppercase letter",
+    hasLowercase: (value: string) =>
+      /[a-z]/.test(value) || "Password must contain a lowercase letter",
     hasNumber: (value: string) =>
       /\d/.test(value) || "Password must contain a number",
+    hasSpecialChar: (value: string) =>
+      /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value) || "Password must contain a special character",
   },
 };
 

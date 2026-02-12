@@ -13,7 +13,11 @@ export const authRouter = router({
     .input(
       z.object({
         email: z.string().email().toLowerCase(),
-        password: z.string().min(8),
+        password: z.string().min(8)
+          .regex(/[A-Z]/, "Password must contain an uppercase letter")
+          .regex(/[a-z]/, "Password must contain a lowercase letter")
+          .regex(/\d/, "Password must contain a number")
+          .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, "Password must contain a special character"),
         firstName: z.string().min(1),
         lastName: z.string().min(1),
         phoneNumber: z.string().regex(/^\+?\d{10,15}$/),
