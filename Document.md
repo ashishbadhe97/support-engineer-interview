@@ -67,16 +67,35 @@ Social Security Numbers were stored as plaintext in the database and returned in
 ### Fix
 Created `utils/encryption.ts` with:
 - **`encryptSSN()`** — encrypts using AES-256-GCM (IV + auth tag + ciphertext stored as a single hex string).
-- **`decryptSSN()`** — decrypts when internal access to the full SSN is needed.
-- **`maskSSN()`** — returns `***-**-XXXX` (only last 4 digits visible) for display/API responses.
 
 Changes in `server/routers/auth.ts`:
-- **Signup**: SSN is encrypted before DB insert.
-- **Signup response**: returns masked SSN via `maskSSN(input.ssn)`.
-- **Login response**: decrypts stored SSN then masks it via `maskSSN(decryptSSN(user.ssn))`.
+- **Signup**: SSN is encrypted via `encryptSSN()` before DB insert.
+- **API responses**: SSN is excluded — only `password` was being omitted before; now neither sensitive field is exposed.
 
 ### Preventive Measures
 - Never store (SSN, government IDs) in plaintext — always encrypt at rest.
 - Never return sensitive fields in API responses — mask or omit them.
 - Store encryption keys in a secure key management service (e.g., AWS KMS), not in code or env files.
 - Add automated security scans to catch plaintext in DB columns.
+
+---
+
+## Ticket VAL-206: Card Number Validation
+
+**Reporter:** David Brown  
+**Priority:** Critical
+
+### Bug Summary
+The system accepted invalid card numbers (any 16 digits starting with `4` or `5`), leading to failed transactions.
+
+### Root Cause
+The card validation only checked the first digit prefix — no checksum validation. Any fabricated 16-digit number starting with `4` or `5` would pass.
+
+### Fix
+Replaced the prefix check with the **Luhn algorithm** in `FundingModal.tsx`:
+- Validates the card number's checksum digit — the industry standard used by all major card networks.
+- Also added a `useEffect` to clear the `accountNumber` error when the user switches between Card and Bank funding types.
+
+### Preventive Measures
+- Use industry-standard algorithms (Luhn) for financial input validation.
+- Clear field-level errors when the context of a form field changes (e.g., switching input types).

@@ -1,9 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { trpc } from "@/lib/trpc/client";
 import { useTheme } from "@/components/ThemeProvider";
+
+function luhnCheck(cardNumber: string): boolean {
+  const digits = cardNumber.replace(/\D/g, "");
+  let sum = 0;
+  let alternate = false;
+  for (let i = digits.length - 1; i >= 0; i--) {
+    let n = parseInt(digits[i], 10);
+    if (alternate) {
+      n *= 2;
+      if (n > 9) n -= 9;
+    }
+    sum += n;
+    alternate = !alternate;
+  }
+  return sum % 10 === 0;
+}
 
 interface FundingModalProps {
   accountId: number;
@@ -26,6 +42,7 @@ export function FundingModal({ accountId, onClose, onSuccess }: FundingModalProp
     register,
     handleSubmit,
     watch,
+    clearErrors,
     formState: { errors },
   } = useForm<FundingFormData>({
     defaultValues: {
@@ -35,6 +52,11 @@ export function FundingModal({ accountId, onClose, onSuccess }: FundingModalProp
 
   const fundingType = watch("fundingType");
   const fundAccountMutation = trpc.account.fundAccount.useMutation();
+
+  useEffect(() => {
+    setError("");
+    clearErrors("accountNumber");
+  }, [fundingType, clearErrors]);
 
   const onSubmit = async (data: FundingFormData) => {
     setError("");
@@ -123,9 +145,9 @@ export function FundingModal({ accountId, onClose, onSuccess }: FundingModalProp
                   message: fundingType === "card" ? "Card number must be 16 digits" : "Invalid account number",
                 },
                 validate: {
-                  validCard: (value) => {
+                  luhn: (value) => {
                     if (fundingType !== "card") return true;
-                    return value.startsWith("4") || value.startsWith("5") || "Invalid card number";
+                    return luhnCheck(value) || "Invalid card number";
                   },
                 },
               })}
