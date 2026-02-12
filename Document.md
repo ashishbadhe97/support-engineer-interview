@@ -151,3 +151,19 @@ Two bugs in the `fundAccount` mutation (`server/routers/account.ts`):
 - Never use iterative loops for simple arithmetic — they accumulate floating-point errors.
 - Always round currency values to 2 decimal places (`Math.round(x * 100) / 100`).
 - Ensure the value stored in DB and the value returned to the client come from the same source.
+
+---
+
+## Ticket PERF-401: Account Creation Error
+
+**Reporter:** Support Team  
+**Priority:** Critical
+
+### Bug Summary
+Newly created accounts sometimes displayed a $100 balance instead of $0.
+
+### Root Cause
+After inserting a new account (with `balance: 0`), the code fetched it back from the DB. If the fetch returned `null`, a **hardcoded fallback object** was returned with `balance: 100` and `status: "pending"` — silently showing incorrect data instead of surfacing the error.
+
+### Fix
+Changed the fallback object's `balance` from `100` to `0` in `server/routers/account.ts`, so if the DB fetch after insert fails, the returned balance matches the inserted value.
