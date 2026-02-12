@@ -6,6 +6,17 @@ import { useForm } from "react-hook-form";
 import { trpc } from "@/lib/trpc/client";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
+import {
+  emailValidation,
+  passwordValidation,
+  confirmPasswordValidation,
+  phoneValidation,
+  dateOfBirthValidation,
+  ssnValidation,
+  stateValidation,
+  zipCodeValidation,
+  getTodayString,
+} from "@/utils/validations";
 
 type SignupFormData = {
   email: string;
@@ -86,13 +97,7 @@ export default function SignupPage() {
                   Email
                 </label>
                 <input
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^\S+@\S+$/i,
-                      message: "Invalid email address",
-                    },
-                  })}
+                  {...register("email", emailValidation)}
                   type="email"
                   className={inputClass}
                 />
@@ -104,20 +109,7 @@ export default function SignupPage() {
                   Password
                 </label>
                 <input
-                  {...register("password", {
-                    required: "Password is required",
-                    minLength: {
-                      value: 8,
-                      message: "Password must be at least 8 characters",
-                    },
-                    validate: {
-                      notCommon: (value) => {
-                        const commonPasswords = ["password", "12345678", "qwerty"];
-                        return !commonPasswords.includes(value.toLowerCase()) || "Password is too common";
-                      },
-                      hasNumber: (value) => /\d/.test(value) || "Password must contain a number",
-                    },
-                  })}
+                  {...register("password", passwordValidation)}
                   type="password"
                   className={inputClass}
                 />
@@ -129,10 +121,7 @@ export default function SignupPage() {
                   Confirm Password
                 </label>
                 <input
-                  {...register("confirmPassword", {
-                    required: "Please confirm your password",
-                    validate: (value) => value === password || "Passwords do not match",
-                  })}
+                  {...register("confirmPassword", confirmPasswordValidation(password))}
                   type="password"
                   className={inputClass}
                 />
@@ -176,13 +165,7 @@ export default function SignupPage() {
                   Phone Number
                 </label>
                 <input
-                  {...register("phoneNumber", {
-                    required: "Phone number is required",
-                    pattern: {
-                      value: /^\d{10}$/,
-                      message: "Phone number must be 10 digits",
-                    },
-                  })}
+                  {...register("phoneNumber", phoneValidation)}
                   type="tel"
                   placeholder="1234567890"
                   className={inputClass}
@@ -195,8 +178,9 @@ export default function SignupPage() {
                   Date of Birth
                 </label>
                 <input
-                  {...register("dateOfBirth", { required: "Date of birth is required" })}
+                  {...register("dateOfBirth", dateOfBirthValidation)}
                   type="date"
+                  max={getTodayString()}
                   className={inputClass}
                 />
                 {errors.dateOfBirth && <p className="mt-1 text-sm text-red-600">{errors.dateOfBirth.message}</p>}
@@ -211,13 +195,7 @@ export default function SignupPage() {
                   Social Security Number
                 </label>
                 <input
-                  {...register("ssn", {
-                    required: "SSN is required",
-                    pattern: {
-                      value: /^\d{9}$/,
-                      message: "SSN must be 9 digits",
-                    },
-                  })}
+                  {...register("ssn", ssnValidation)}
                   type="text"
                   placeholder="123456789"
                   className={inputClass}
@@ -255,13 +233,7 @@ export default function SignupPage() {
                     State
                   </label>
                   <input
-                    {...register("state", {
-                      required: "State is required",
-                      pattern: {
-                        value: /^[A-Z]{2}$/,
-                        message: "Use 2-letter state code",
-                      },
-                    })}
+                    {...register("state", stateValidation)}
                     type="text"
                     placeholder="CA"
                     className={inputClass}
@@ -274,13 +246,7 @@ export default function SignupPage() {
                     ZIP Code
                   </label>
                   <input
-                    {...register("zipCode", {
-                      required: "ZIP code is required",
-                      pattern: {
-                        value: /^\d{5}$/,
-                        message: "ZIP code must be 5 digits",
-                      },
-                    })}
+                    {...register("zipCode", zipCodeValidation)}
                     type="text"
                     placeholder="12345"
                     className={inputClass}
