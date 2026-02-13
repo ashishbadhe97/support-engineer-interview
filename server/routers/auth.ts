@@ -131,6 +131,8 @@ export const authRouter = router({
     }),
 
   logout: publicProcedure.mutation(async ({ ctx }) => {
+    let sessionDeleted = false;
+
     if (ctx.user) {
       // Delete session from database
       let token: string | undefined;
@@ -145,6 +147,7 @@ export const authRouter = router({
       }
       if (token) {
         await db.delete(sessions).where(eq(sessions.token, token));
+        sessionDeleted = true;
       }
     }
 
@@ -154,6 +157,9 @@ export const authRouter = router({
       (ctx.res as Headers).set("Set-Cookie", `session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0`);
     }
 
-    return { success: true, message: ctx.user ? "Logged out successfully" : "No active session" };
+    return {
+      success: sessionDeleted,
+      message: sessionDeleted ? "Logged out successfully" : "No active session",
+    };
   }),
 });

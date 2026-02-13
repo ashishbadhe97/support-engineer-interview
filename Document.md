@@ -234,3 +234,53 @@ The state validation in `utils/validations.ts` used `/^[A-Z]{2}$/` — matching 
 
 ### Fix
 Replaced the regex with a whitelist of all 50 US states plus DC and territories (PR, VI, GU, AS, MP). The `validate` function checks the input against this `Set`, also handling case-insensitivity via `.toUpperCase()`.
+
+---
+
+## Ticket VAL-204: Phone Number Format
+
+**Reporter:** John Smith  
+**Priority:** Medium
+
+### Bug Summary
+International phone numbers weren't validated properly. The system only accepted exactly 10 bare digits, rejecting formatted numbers and international formats.
+
+### Root Cause
+The phone validation regex `/^\d{10}$/` only matched exactly 10 consecutive digits — no support for parentheses, dashes, spaces, country codes, or international numbers.
+
+### Fix
+Updated `phoneValidation` in `utils/validations.ts`:
+1. **Flexible pattern** — accepts formats like `(555) 123-4567`, `+1-555-123-4567`, and international numbers with country codes.
+2. **Digit count validation** — strips non-digit characters and checks that the actual digit count is between 10 and 15 (ITU-T E.164 standard).
+
+---
+
+## Ticket VAL-209: Amount Input Issues
+
+**Reporter:** Robert Lee  
+**Priority:** Medium
+
+### Bug Summary
+The system accepted amounts with multiple leading zeros (e.g., `00100.00`, `007`), causing confusion in transaction records.
+
+### Root Cause
+The amount regex `/^\d+\.?\d{0,2}$/` allowed any number of leading digits including zeros — `00100.00` passed validation.
+
+### Fix
+Updated the regex to `/^(0|[1-9]\d*)(\.\d{1,2})?$/` in `components/FundingModal.tsx`. This allows only a single `0` before the decimal point (for amounts like `0.50`) or numbers starting with `1-9`.
+
+---
+
+## Ticket PERF-402: Logout Issues
+
+**Reporter:** QA Team  
+**Priority:** Medium
+
+### Bug Summary
+Logout always reported success even when no session was actually deleted, giving users a false sense of security.
+
+### Root Cause
+The logout mutation in `server/routers/auth.ts` always returned `{ success: true }` — even when `ctx.user` was null (no active session) or when the session token couldn't be found (so the DB delete never ran).
+
+### Fix
+Added a `sessionDeleted` flag that is only set to `true` when the DB session is actually deleted. The response now returns `success: sessionDeleted` — accurately reporting whether the logout was effective.

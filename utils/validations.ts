@@ -39,8 +39,15 @@ export const confirmPasswordValidation = (password: string) => ({
 export const phoneValidation = {
   required: "Phone number is required",
   pattern: {
-    value: /^\d{10}$/,
-    message: "Phone number must be 10 digits",
+    value: /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\./0-9]*$/,
+    message: "Invalid phone number format",
+  },
+  validate: (value: string) => {
+    const digits = value.replace(/\D/g, "");
+    if (digits.length < 10 || digits.length > 15) {
+      return "Phone number must be between 10 and 15 digits";
+    }
+    return true;
   },
 };
 
