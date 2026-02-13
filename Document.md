@@ -218,3 +218,19 @@ Added a `.refine()` to the server-side `fundingSource` schema that requires a va
 
 ### Preventive Measures
 - Never rely solely on client-side validation — always enforce critical rules server-side as well.
+
+---
+
+## Ticket VAL-203: State Code Validation
+
+**Reporter:** Alex Thompson  
+**Priority:** Medium
+
+### Bug Summary
+The system accepted invalid state codes like "XX", causing address verification issues for banking communications.
+
+### Root Cause
+The state validation in `utils/validations.ts` used `/^[A-Z]{2}$/` — matching any two uppercase letters. There was no check against actual US state codes.
+
+### Fix
+Replaced the regex with a whitelist of all 50 US states plus DC and territories (PR, VI, GU, AS, MP). The `validate` function checks the input against this `Set`, also handling case-insensitivity via `.toUpperCase()`.
