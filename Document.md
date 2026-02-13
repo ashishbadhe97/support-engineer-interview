@@ -96,9 +96,6 @@ Replaced the prefix check with the **Luhn algorithm** in `FundingModal.tsx`:
 - Validates the card number's checksum digit — the industry standard used by all major card networks.
 - Also added a `useEffect` to clear the `accountNumber` error when the user switches between Card and Bank funding types.
 
-### Preventive Measures
-- Use industry-standard algorithms (Luhn) for financial input validation.
-- Clear field-level errors when the context of a form field changes (e.g., switching input types).
 
 ---
 
@@ -184,6 +181,9 @@ After a successful funding, the `onSuccess` callback in `app/dashboard/page.tsx`
 ### Fix
 Added `utils.account.getTransactions.invalidate()` to the funding `onSuccess` callback in `app/dashboard/page.tsx`, using tRPC's `useUtils()`. This forces the transactions query to refetch after every funding event, so the list always shows the latest transactions.
 
+### Preventive Measures
+- After any mutation that creates or modifies data, invalidate all related queries — not just the most obvious one.
+
 ---
 
 ## Ticket VAL-205: Zero Amount Funding
@@ -215,3 +215,6 @@ The server-side Zod schema in `server/routers/account.ts` had `routingNumber: z.
 
 ### Fix
 Added a `.refine()` to the server-side `fundingSource` schema that requires a valid 9-digit routing number when `type` is `"bank"`. This enforces the validation server-side regardless of the client.
+
+### Preventive Measures
+- Never rely solely on client-side validation — always enforce critical rules server-side as well.
